@@ -24,6 +24,13 @@
             <button type="submit" class="btn btn-dark">Register</button>
           </form>
 
+          <% if(userExistError.length>0){ %>
+            <div class="alert alert-danger mt-2" role="alert">
+              <%= userExistError %>
+            </div>
+            <% } %>
+
+
         </div>
       </div>
     </div>

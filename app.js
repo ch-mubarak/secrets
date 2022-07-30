@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport")
 const passportLocalMongoose = require("passport-local-mongoose")
+const flash = require('connect-flash');
 
 const app = express();
 
@@ -17,7 +18,10 @@ app.use(session({
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: { maxAge: 60000 }
 }));
+
+app.use(flash())
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -46,7 +50,8 @@ app.get("/", (req, res) => {
         res.redirect("/secrets")
     }
     else {
-        res.render("home");
+        const logoutMessage=req.flash("message")
+        res.render("home",{logoutMessage});
     }
 
 });
@@ -56,15 +61,18 @@ app.get("/login", (req, res) => {
         res.redirect("/secrets")
     }
     else {
-        res.render("login");
+        const loginErrorMessage=req.flash("message")
+        res.render("login",{loginErrorMessage});
     }
 });
 
 app.get("/register", (req, res) => {
-    res.render("register");
+    const userExistError= req.flash("message")
+    res.render("register",{userExistError});
 });
 
 app.get("/secrets", function (req, res) {
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stal   e=0, post-check=0, pre-check=0');
     User.find({ "secret": { $ne: null } }, function (err, foundUsers) {
         if (err) {
             console.log(err)
@@ -92,46 +100,89 @@ app.get("/logout", function (req, res) {
         if (err) {
             console.log(err)
         }
+        req.flash("message","You have successfully logged out")
+        res.redirect("/");
     });
-    res.redirect("/");
 })
 
 
 app.get("/admin", function (req, res) {
 
-    if(req.isAuthenticated()){
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stal   e=0, post-check=0, pre-check=0');
+
+    if (req.isAuthenticated()) {
 
         if (req.user.isAdmin === true) {
-    
+
             User.find(({}, function (err, foundUsers) {
-    
+
                 if (err) {
                     console.log(err)
                 }
                 else {
                     if (foundUsers) {
-    
+
                         res.render("admin", { userDB: foundUsers })
                     }
                 }
             }))
         }
-        else(res.redirect("/"))
+        else (res.redirect("/"))
     }
 
 
     else {
-        res.redirect("/");
+        req.flash("message","Your not authorized")
+        res.redirect("/login");
     }
 
 })
 
+app.get("/delete/:id", function (req, res) {
+
+    User.findByIdAndRemove(req.params.id, (err) => {
+        if (!err) {
+            console.log("successfully removed")
+        }
+    })
+    res.redirect("/admin")
+
+})
+
+app.get("/update/:id", function (req, res) {
+    User.findById(req.params.id, function (err, foundUser) {
+
+        if (err) {
+            console.log(err)
+        }
+        else {
+            if (foundUser) {
+                res.render("update", {
+                    userToUpdate: foundUser,
+                    id: req.params.id
+                })
+            }
+            else {
+                res.redirect("/admin")
+            }
+        }
+
+    })
+
+})
+
+
 
 app.post("/register", (req, res) => {
 
-    User.register({ username: req.body.username, name: req.body.name, isAdmin: false }, req.body.password, function (err, user) {
+    User.register({
+        username: req.body.username,
+        name: req.body.name,
+        isAdmin: false
+    }, req.body.password, function (err, user) {
         if (err) {
-            console.log(err);
+            console.log("error:" + err);
+            req.flash("message","user already registered")
             res.redirect("/register")
         }
         else {
@@ -145,7 +196,7 @@ app.post("/register", (req, res) => {
 
 
 app.post('/login',
-    passport.authenticate('local', { failureRedirect: '/login' }),
+    passport.authenticate('local', { failureRedirect: '/login',failureFlash:true}),
     function (req, res) {
         res.redirect('/secrets');
     });
@@ -169,22 +220,30 @@ app.post("/submit", (req, res) => {
 
 })
 
-app.get("/delete/:id", function (req,res) {
-
-    User.findByIdAndRemove(req.params.id,(err)=>{
-        if(!err){
-            console.log("successfully removed")
+app.post("/update/:id", function (req, res) {
+    console.log("post:" + req.params.id)
+    console.log(req.body)
+    User.findOneAndUpdate({ _id: req.params.id }, {
+        $set: {
+            name: req.body.name,
+            username: req.body.username,
+            secret: req.body.secret
         }
-    })
+    },
+        function (err) {
+            if (err) {
+                console.log(err)
+            }
+            else {
+                console.log("updated successfully")
+            }
+
+        })
+
     res.redirect("/admin")
-  
 })
 
-app.get("/update/:id",function(req,res){
 
-    
-
-})
 
 
 
