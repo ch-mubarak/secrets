@@ -50,8 +50,9 @@ app.get("/", (req, res) => {
         res.redirect("/secrets")
     }
     else {
+        const adminAccessError=req.flash("adminMessage")
         const logoutMessage=req.flash("message")
-        res.render("home",{logoutMessage});
+        res.render("home",{logoutMessage,adminAccessError});
     }
 
 });
@@ -61,7 +62,7 @@ app.get("/login", (req, res) => {
         res.redirect("/secrets")
     }
     else {
-        const loginErrorMessage=req.flash("message")
+        const loginErrorMessage=req.flash().error
         res.render("login",{loginErrorMessage});
     }
 });
@@ -132,8 +133,8 @@ app.get("/admin", function (req, res) {
 
 
     else {
-        req.flash("message","Your not authorized")
-        res.redirect("/login");
+        req.flash("adminMessage","Your not authorized")
+        res.redirect("/");
     }
 
 })
@@ -196,7 +197,7 @@ app.post("/register", (req, res) => {
 
 
 app.post('/login',
-    passport.authenticate('local', { failureRedirect: '/login',failureFlash:true}),
+    passport.authenticate('local', { failureFlash:true,failureRedirect: '/login'}),
     function (req, res) {
         res.redirect('/secrets');
     });
