@@ -169,8 +169,21 @@ app.post("/submit", (req, res) => {
 
 })
 
-app.get("/delete", function (res, req) {
-    console.log(req.body)
+app.get("/delete/:id", function (req,res) {
+
+    User.findByIdAndRemove(req.params.id,(err)=>{
+        if(!err){
+            console.log("successfully removed")
+        }
+    })
+    res.redirect("/admin")
+  
+})
+
+app.get("/update/:id",function(req,res){
+
+    
+
 })
 
 
