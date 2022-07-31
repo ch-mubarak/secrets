@@ -10,13 +10,13 @@
       <a class="btn btn-light btn-lg" href="/register" role="button">Register</a>
       <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
 
-      <% if(logoutMessage.length) { %>
+      <% if(logoutMessage.length>0) { %>
         <div class="alert alert-success mt-2" role="alert">
           <%= logoutMessage %>
         </div>
         <% } %>
 
-          <% if(adminAccessError.length) { %>
+          <% if(adminAccessError.length>0) { %>
             <div class="alert alert-danger mt-2" role="alert">
               <%= adminAccessError %>
             </div>

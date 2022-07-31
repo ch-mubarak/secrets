@@ -4,7 +4,7 @@
         <h1>Update</h1>
         <div class="row">
             <div class="col-sm-8">
-                <div class="card">
+                <div class="card shadow p-3 mb-5 bg-white rounded">
                     <div class="card-body">
                         <form action="/update/<%=id%>" method="POST">
                             <div class="form-group">
@@ -13,11 +13,14 @@
                             </div>
                             <div class="form-group">
                                 <label for="email">Email</label>
-                                <input type="email" class="form-control" name="username" value="<%= userToUpdate.username %>">
+                                <input type="email" class="form-control" name="username"
+                                    value="<%= userToUpdate.username %>">
                             </div>
-                            <div>
+                            <div class="form-group">
                                 <label>Secret</label>
-                                <input type="text" class="form-control text-center" name="secret" value="<%= userToUpdate.secret %>">
+                                <textarea type="text" class="form-control rows=6"
+                                    name="secret"><%= userToUpdate.secret %></textarea>
+
                             </div>
                             <button type="submit" class="btn btn-dark m-2">Update</button>
                     </div>

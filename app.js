@@ -57,6 +57,10 @@ app.get("/", (req, res) => {
 
 });
 
+app.get("/test",function(req,res){
+    res.render("secrets2")
+})
+
 app.get("/login", (req, res) => {
     if (req.isAuthenticated()) {
         res.redirect("/secrets")
@@ -151,24 +155,30 @@ app.get("/delete/:id", function (req, res) {
 })
 
 app.get("/update/:id", function (req, res) {
-    User.findById(req.params.id, function (err, foundUser) {
+    if(req.isAuthenticated()){
 
-        if (err) {
-            console.log(err)
-        }
-        else {
-            if (foundUser) {
-                res.render("update", {
-                    userToUpdate: foundUser,
-                    id: req.params.id
-                })
+        User.findById(req.params.id, function (err, foundUser) {
+    
+            if (err) {
+                console.log(err)
             }
             else {
-                res.redirect("/admin")
+                if (foundUser) {
+                    res.render("update", {
+                        userToUpdate: foundUser,
+                        id: req.params.id
+                    })
+                }
+                else {
+                    res.redirect("/admin")
+                }
             }
-        }
-
-    })
+    
+        })
+    }
+    else{
+        res.redirect("/")
+    }
 
 })
 
@@ -243,9 +253,6 @@ app.post("/update/:id", function (req, res) {
 
     res.redirect("/admin")
 })
-
-
-
 
 
 
